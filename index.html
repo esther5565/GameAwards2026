@@ -9,7 +9,7 @@
 *{box-sizing:border-box}
 body{margin:0;background:radial-gradient(ellipse at 50% -10%,#2b2312 0,var(--bg) 55%) fixed,var(--bg);color:var(--text);font-family:Montserrat,system-ui,sans-serif;min-height:100vh}
 header{text-align:center;padding:40px 16px 8px}
-.logo{font-family:Cinzel,serif;font-weight:900;letter-spacing:.3em;font-size:clamp(22px,5vw,40px);background:linear-gradient(180deg,var(--gold2),var(--gold) 60%,#7b6230);-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo{font-family:Cinzel,serif;font-weight:900;letter-spacing:.3em;font-size:clamp(40px,11vw,80px);line-height:1.05;letter-spacing:.14em;background:linear-gradient(180deg,var(--gold2),var(--gold) 60%,#7b6230);-webkit-background-clip:text;background-clip:text;color:transparent}
 .sub{color:var(--mute);letter-spacing:.3em;font-size:11px;text-transform:uppercase;margin-top:6px}
 nav{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:18px 12px;position:sticky;top:0;background:linear-gradient(var(--bg) 70%,transparent);z-index:5}
 nav button{background:none;border:1px solid var(--line);color:var(--mute);padding:9px 18px;font:600 12px Montserrat,sans-serif;letter-spacing:.15em;text-transform:uppercase;cursor:pointer}
@@ -119,13 +119,20 @@ main{padding:0 10px 60px}
 .gk{font:600 10px Montserrat,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
 .gn{font:700 15px Cinzel,serif;color:var(--gold2);margin-top:3px;line-height:1.2;overflow-wrap:anywhere}
 .gi{animation:beat 4.2s ease-in-out infinite;z-index:0}
-@keyframes beat{0%,100%{box-shadow:0 0 10px 2px rgba(255,212,90,.45),0 0 24px 6px rgba(255,150,30,.2)}15%{box-shadow:0 0 22px 6px rgba(255,225,120,.9),0 0 50px 14px rgba(255,150,30,.5)}30%{box-shadow:0 0 12px 3px rgba(255,212,90,.55),0 0 28px 8px rgba(255,150,30,.25)}45%{box-shadow:0 0 18px 5px rgba(255,225,120,.8),0 0 42px 10px rgba(255,150,30,.4)}}
+@keyframes beat{0%,100%{box-shadow:0 0 6px 1px rgba(255,212,90,.4),0 0 14px 3px rgba(255,150,30,.15)}15%{box-shadow:0 0 13px 3px rgba(255,225,120,.85),0 0 28px 8px rgba(255,150,30,.4)}30%{box-shadow:0 0 8px 2px rgba(255,212,90,.5),0 0 17px 4px rgba(255,150,30,.2)}45%{box-shadow:0 0 11px 3px rgba(255,225,120,.75),0 0 24px 6px rgba(255,150,30,.32)}}
 .gi:nth-child(2n){animation-delay:-1.05s}.gi:nth-child(3n){animation-delay:-2.1s}
-.wt{font:900 clamp(40px,11vw,80px) Cinzel,serif;letter-spacing:.14em;text-align:center;text-transform:uppercase;margin:50px 0 22px;line-height:1.05;background:linear-gradient(180deg,var(--gold2),var(--gold) 60%,#7b6230);-webkit-background-clip:text;background-clip:text;color:transparent}
+.wt{font:900 clamp(32px,8.5vw,64px) Cinzel,serif;letter-spacing:.14em;text-align:center;text-transform:uppercase;margin:50px 0 22px;line-height:1.05;background:linear-gradient(180deg,var(--gold2),var(--gold) 60%,#7b6230);-webkit-background-clip:text;background-clip:text;color:transparent}
 @media (prefers-reduced-motion:reduce){.gi{animation:none}}
+.lb.r1,.lb.r2,.lb.r3{border:0;color:#16120a}
+.lb.r1{background:linear-gradient(135deg,#f6e3a8,#d4af37 50%,#97761f);animation:beat 4.2s ease-in-out infinite}
+.lb.r2{background:linear-gradient(135deg,#f1f3f6,#b4bcc6 50%,#7e8791)}
+.lb.r3{background:linear-gradient(135deg,#eab184,#b87333 50%,#7a4a1f)}
+.lb.r1 .n,.lb.r1 .s,.lb.r2 .n,.lb.r2 .s,.lb.r3 .n,.lb.r3 .s{color:#16120a}
+.lb.r1 div:nth-child(2),.lb.r2 div:nth-child(2),.lb.r3 div:nth-child(2){font-weight:700}
+@media (prefers-reduced-motion:reduce){.lb.r1{animation:none}}
 @media (prefers-reduced-motion:reduce){.win,.win .tr{animation:none}}
 </style></head><body>
-<header><div class="logo">THE FRIENDS AWARDS 2026</div><div class="sub">Pick your winners. Predict the real ones.</div></header>
+<header><div class="logo">THE FRIENDS AWARDS</div><div class="sub">Pick your winners. Predict the real ones.</div></header>
 <nav id="nav"></nav><main id="app"><div class="msg">Loading…</div></main>
 <script>
 // ====== PASTE YOUR APPS SCRIPT WEB APP URL HERE ======
@@ -242,7 +249,8 @@ function stats() {
 function board() {
   if (!published) return h('div', { class: 'msg' }, 'Results haven’t been announced yet. Check back on award night.');
   const a = h('div'), r = Object.entries(allVotes()).filter(([, p]) => done(p)).map(([n, p]) => [n, score(p)]).sort((x, y) => y[1] - x[1]);
-  r.forEach(([n, s], i) => a.append(h('div', { class: 'lb' }, h('div', { class: 'n' }, i + 1), h('div', null, n), h('div', { class: 's' }, s + ' / ' + cats.length))));
+  const lv = [...new Set(r.map(x => x[1]))];
+  r.forEach(([n, s]) => { const k = lv.indexOf(s); a.append(h('div', { class: 'lb' + (k < 3 ? ' r' + (k + 1) : '') }, h('div', { class: 'n' }, k + 1), h('div', null, n), h('div', { class: 's' }, s + ' / ' + cats.length))) });
   a.append(h('h2', { class: 'wt' }, 'The Winners'));
   const g = h('div', { class: 'gal' });
   cats.filter(c => results[c.id]).forEach(c => {
