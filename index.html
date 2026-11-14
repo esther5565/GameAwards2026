@@ -118,9 +118,10 @@ main{padding:0 10px 60px}
 .gc{position:absolute;left:0;right:0;bottom:0;padding:34px 10px 10px;background:linear-gradient(transparent,rgba(0,0,0,.92) 70%);text-align:center}
 .gk{font:600 10px Montserrat,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
 .gn{font:700 15px Cinzel,serif;color:var(--gold2);margin-top:3px;line-height:1.2;overflow-wrap:anywhere}
-.gi{animation:beat 1.4s ease-in-out infinite;z-index:0}
-@keyframes beat{0%,100%{transform:scale(1);box-shadow:0 0 10px 2px rgba(255,212,90,.45),0 0 24px 6px rgba(255,150,30,.2)}15%{transform:scale(1.03);box-shadow:0 0 22px 6px rgba(255,225,120,.9),0 0 50px 14px rgba(255,150,30,.5)}30%{transform:scale(1);box-shadow:0 0 12px 3px rgba(255,212,90,.55),0 0 28px 8px rgba(255,150,30,.25)}45%{transform:scale(1.02);box-shadow:0 0 18px 5px rgba(255,225,120,.8),0 0 42px 10px rgba(255,150,30,.4)}}
-.gi:nth-child(2n){animation-delay:-.35s}.gi:nth-child(3n){animation-delay:-.7s}
+.gi{animation:beat 4.2s ease-in-out infinite;z-index:0}
+@keyframes beat{0%,100%{box-shadow:0 0 10px 2px rgba(255,212,90,.45),0 0 24px 6px rgba(255,150,30,.2)}15%{box-shadow:0 0 22px 6px rgba(255,225,120,.9),0 0 50px 14px rgba(255,150,30,.5)}30%{box-shadow:0 0 12px 3px rgba(255,212,90,.55),0 0 28px 8px rgba(255,150,30,.25)}45%{box-shadow:0 0 18px 5px rgba(255,225,120,.8),0 0 42px 10px rgba(255,150,30,.4)}}
+.gi:nth-child(2n){animation-delay:-1.05s}.gi:nth-child(3n){animation-delay:-2.1s}
+.wt{font:900 clamp(40px,11vw,80px) Cinzel,serif;letter-spacing:.14em;text-align:center;text-transform:uppercase;margin:50px 0 22px;line-height:1.05;background:linear-gradient(180deg,var(--gold2),var(--gold) 60%,#7b6230);-webkit-background-clip:text;background-clip:text;color:transparent}
 @media (prefers-reduced-motion:reduce){.gi{animation:none}}
 @media (prefers-reduced-motion:reduce){.win,.win .tr{animation:none}}
 </style></head><body>
@@ -242,7 +243,7 @@ function board() {
   if (!published) return h('div', { class: 'msg' }, 'Results haven’t been announced yet. Check back on award night.');
   const a = h('div'), r = Object.entries(allVotes()).filter(([, p]) => done(p)).map(([n, p]) => [n, score(p)]).sort((x, y) => y[1] - x[1]);
   r.forEach(([n, s], i) => a.append(h('div', { class: 'lb' }, h('div', { class: 'n' }, i + 1), h('div', null, n), h('div', { class: 's' }, s + ' / ' + cats.length))));
-  a.append(h('div', { class: 'sh', style: 'margin-top:30px' }, 'The winners'));
+  a.append(h('h2', { class: 'wt' }, 'The Winners'));
   const g = h('div', { class: 'gal' });
   cats.filter(c => results[c.id]).forEach(c => {
     const w = results[c.id], im = imgOf(c, w), it = h('div', { class: 'gi' });
