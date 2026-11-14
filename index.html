@@ -48,18 +48,37 @@ input,select{width:100%;background:var(--panel2);color:var(--text);border:1px so
 .win .tr{font-size:90px;animation:g 2.5s infinite}
 .win h1{font:900 clamp(34px,9vw,80px) Cinzel,serif;letter-spacing:.2em;margin:10px 0;background:linear-gradient(180deg,var(--gold2),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
 .win p{color:var(--mute);letter-spacing:.2em;text-transform:uppercase;font-size:12px}
+.ngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.nc{position:relative;display:grid;grid-template-columns:112px 1fr;gap:12px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
+.nc.w{border-color:var(--gold2)}
+.num{position:absolute;top:0;left:0;z-index:2;background:var(--gold);color:#111;font:700 13px Montserrat,sans-serif;padding:3px 9px;border-radius:12px 0 10px 0}
+.pic{display:block;aspect-ratio:3/4;border-radius:8px;overflow:hidden;position:relative;background:linear-gradient(160deg,#2c2411,#0c0c0e);text-decoration:none;display:flex;align-items:flex-end}
+.pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pic span{position:relative;padding:8px;font:700 13px Cinzel,serif;color:var(--gold2)}
+.ni{display:flex;flex-direction:column;min-width:0}
+.nt{font-weight:700;font-size:16px;line-height:1.25;color:var(--text);text-decoration:none}
+.nt:hover,.pic:hover+.ni .nt{color:var(--gold2);text-decoration:underline}
+.dev{color:var(--mute);font-size:12px;margin-top:4px}
+.nb{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:auto;padding-top:10px}
+.nb button{background:var(--panel);border:1px solid var(--line);border-radius:8px;color:var(--text);padding:10px 4px;font:700 11px Montserrat,sans-serif;letter-spacing:.06em;cursor:pointer}
+.nb button:hover{border-color:var(--gold)}
+.nb button.sel{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#111;border-color:var(--gold2)}
+.nb button:disabled{cursor:default;opacity:.85}
+.cd{text-align:center;margin:6px 0 2px;font:700 13px Montserrat,sans-serif;letter-spacing:.15em;color:var(--mute)}
+.cd b{color:var(--gold2);font-size:18px;letter-spacing:.08em}
+.cat.n h2{text-align:center}
 @media (prefers-reduced-motion:reduce){.win,.win .tr{animation:none}}
 </style></head><body>
 <header><div class="logo">THE FRIENDS AWARDS</div><div class="sub">Pick your winners. Predict the real ones.</div></header>
 <nav id="nav"></nav><main id="app"><div class="msg">Loading…</div></main>
 <script>
 // ====== PASTE YOUR APPS SCRIPT WEB APP URL HERE ======
-const API = "https://script.google.com/macros/s/AKfycbwBEHbT4BhHUyABn096YSpqyElCxD579r-fxMJld_Q-8Vv481kRTzOFpayBQTx8yngNyw/exec";
+const API = "PASTE_YOUR_WEB_APP_URL_HERE";
 // =====================================================
 const $ = s => document.querySelector(s);
-function h(t, a, ...k) { const e = document.createElement(t); for (const x in a || {}) { if (x === 'class') e.className = a[x]; else if (x.startsWith('on')) e[x] = a[x]; else e.setAttribute(x, a[x]) } for (const c of k.flat()) if (c != null) e.append(c); return e }
+function h(t, a, ...k) { const e = document.createElement(t); for (const x in a || {}) { if (a[x] == null) continue; if (x === 'class') e.className = a[x]; else if (x.startsWith('on')) e[x] = a[x]; else e.setAttribute(x, a[x]) } for (const c of k.flat()) if (c != null) e.append(c); return e }
 const store = { get(k) { try { return localStorage.getItem(k) } catch (e) { return null } }, set(k, v) { try { localStorage.setItem(k, v) } catch (e) {} } };
-let cats = [], votes = {}, results = {}, published = false, name = store.get('awards-name') || '', mine = {}, tab = 'ballot', adminKey = '', loaded = false, err = '', dismissed = false;
+let cats = [], votes = {}, results = {}, published = false, locked = false, deadline = '', name = store.get('awards-name') || '', mine = {}, tab = 'ballot', adminKey = '', loaded = false, err = '', dismissed = false;
 const imgOf = (c, n) => (c.noms.find(x => x.name === n) || {}).image || '';
 const done = p => cats.length && cats.every(c => p && p[c.id] && p[c.id].want && p[c.id].will);
 const score = p => cats.reduce((s, c) => s + (p[c.id] && results[c.id] && p[c.id].will === results[c.id] ? 1 : 0), 0);
@@ -67,7 +86,7 @@ const allVotes = () => { const v = Object.assign({}, votes); if (name) v[name] =
 async function load() {
   try {
     const r = await (await fetch(API + '?action=data')).json();
-    cats = r.cats; votes = r.votes; results = r.results; published = r.published; err = '';
+    cats = r.cats; votes = r.votes; results = r.results; published = r.published; locked = r.locked; deadline = r.deadline; err = '';
     if (name && votes[name] && !Object.keys(mine).length) mine = votes[name];
   } catch (e) { err = 'Could not reach the Google Sheet. Check the API URL in index.html.' }
   loaded = true; render();
@@ -78,6 +97,7 @@ async function post(body) {
 }
 let saveT;
 function pick(cid, k, n) {
+  if (locked) return alert('Voting is closed.');
   mine[cid] = Object.assign({}, mine[cid], { [k]: n }); render();
   clearTimeout(saveT); saveT = setTimeout(() => post({ action: 'vote', name, picks: mine }).catch(e => alert('Save failed: ' + e.message)), 600);
 }
@@ -95,22 +115,39 @@ function loginView() {
     const fn = f.value.trim().replace(/\s+/g, ' '), ln = l.value.trim().replace(/\s+/g, ' ');
     if (!fn || !ln) return alert('Please enter both your first name and surname.');
     const full = fn + ' ' + ln, ex = Object.keys(votes).find(k => k.toLowerCase() === full.toLowerCase());
+    if (locked && !ex) return alert('Voting closed on 9 December 2026, and no ballot was found under that name.');
     name = ex || full; store.set('awards-name', name); mine = votes[name] || {}; render();
   };
   [f, l].forEach(i => i.onkeydown = e => { if (e.key === 'Enter') go() });
   return h('div', { class: 'login' }, h('h2', null, 'Who are you?'), h('p', { class: 'hint' }, 'Enter your full name so we know who voted for what. Use the same name next time to edit your picks.'), f, l, h('button', { class: 'btn', onclick: go }, 'Enter'));
 }
+const vurl = x => /^https?:\/\//.test(x.video || '') ? x.video : 'https://www.youtube.com/results?search_query=' + encodeURIComponent(x.name + ' official trailer');
+function cdText() {
+  if (!deadline) return '';
+  const ms = new Date(deadline) - Date.now(); if (ms <= 0) return null;
+  const m = Math.floor(ms / 60000), d = Math.floor(m / 1440), hr = Math.floor(m % 1440 / 60), mi = m % 60, p = n => String(n).padStart(2, '0');
+  return d + ' Days : ' + p(hr) + ' Hrs : ' + p(mi) + ' Min';
+}
+function tick() {
+  const el = $('#cd'); if (!el) return;
+  const t = cdText();
+  if (t === null && !locked) { locked = true; return render() }
+  if (t !== null) el.textContent = t;
+}
 function ballot() {
   const a = h('div'), n = cats.filter(c => mine[c.id] && mine[c.id].want && mine[c.id].will).length;
+  a.append(locked ? h('div', { class: 'cd' }, '🔒 VOTING CLOSED. BALLOTS ARE LOCKED.') : deadline ? h('div', { class: 'cd' }, 'TIME LEFT  ', h('b', { id: 'cd' }, cdText() || ''), h('div', { class: 'hint', style: 'margin:4px 0 0;letter-spacing:0;font-weight:400' }, 'Votes lock at the end of 9 December 2026 (UK time)')) : '');
   a.append(h('div', { class: 'prog' }, done(mine) ? 'BALLOT COMPLETE. See the Stats tab.' : n + ' of ' + cats.length + ' categories done'));
   a.append(h('div', { class: 'prog' }, 'Playing as ' + name + ' ', h('a', { href: '#', style: 'color:var(--gold)', onclick: e => { e.preventDefault(); name = ''; store.set('awards-name', ''); mine = {}; render() } }, '(not you?)')));
   cats.forEach(c => {
-    const p = mine[c.id] || {}, card = h('div', { class: 'cat' }, h('h2', null, c.name), h('div', { class: 'hint' }, 'Want = who you’d like to win. Will win = your prediction (1 point if right).'));
-    card.append(h('div', { class: 'posters' }, c.noms.map(x => {
-      const im = h('div', { class: 'img' }, h('span', null, x.image ? '' : x.name));
-      if (x.image) { const g = h('img', { src: x.image, alt: x.name, loading: 'lazy' }); g.onerror = () => { g.remove(); im.firstChild.textContent = x.name }; im.prepend(g) }
-      return h('div', { class: 'card' + (p.want === x.name || p.will === x.name ? ' w' : '') }, im, h('div', { class: 'name' }, x.name),
-        h('div', { class: 'btns' }, h('button', { class: p.want === x.name ? 'sel' : '', onclick: () => pick(c.id, 'want', x.name) }, '★ WANT'), h('button', { class: p.will === x.name ? 'sel' : '', onclick: () => pick(c.id, 'will', x.name) }, '🔮 WILL WIN')))
+    const p = mine[c.id] || {}, card = h('div', { class: 'cat n' }, h('h2', null, c.name + ' nominees'), h('div', { class: 'hint', style: 'text-align:center' }, 'Want = who you’d like to win. Will win = your prediction (1 point if right). Tap a picture or title to watch the game on YouTube.'));
+    card.append(h('div', { class: 'ngrid' }, c.noms.map((x, i) => {
+      const pic = h('a', { class: 'pic', href: vurl(x), target: '_blank', rel: 'noopener noreferrer', 'aria-label': 'Watch ' + x.name + ' on YouTube' }, h('span', null, x.image ? '' : x.name));
+      if (x.image) { const g = h('img', { src: x.image, alt: x.name, loading: 'lazy' }); g.onerror = () => { g.remove(); pic.lastChild.textContent = x.name }; pic.prepend(g) }
+      const dis = locked ? '' : null;
+      return h('div', { class: 'nc' + (p.want === x.name || p.will === x.name ? ' w' : '') }, h('div', { class: 'num' }, i + 1), pic,
+        h('div', { class: 'ni' }, h('a', { class: 'nt', href: vurl(x), target: '_blank', rel: 'noopener noreferrer' }, x.name), x.developer ? h('div', { class: 'dev' }, x.developer) : null,
+          h('div', { class: 'nb' }, h('button', { disabled: dis, class: p.want === x.name ? 'sel' : '', onclick: () => pick(c.id, 'want', x.name) }, '★ WANT'), h('button', { disabled: dis, class: p.will === x.name ? 'sel' : '', onclick: () => pick(c.id, 'will', x.name) }, '🔮 WILL WIN'))));
     })));
     a.append(card)
   });
@@ -170,5 +207,6 @@ function render() {
 }
 if (location.hash === '#admin') adminKey = prompt('Admin key') || '';
 render(); load();
+setInterval(tick, 30000);
 setInterval(() => { if (document.visibilityState === 'visible' && (tab === 'stats' || tab === 'board')) load() }, 30000);
 </script></body></html>
