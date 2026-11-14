@@ -48,8 +48,8 @@ input,select{width:100%;background:var(--panel2);color:var(--text);border:1px so
 .win .tr{font-size:90px;animation:g 2.5s infinite}
 .win h1{font:900 clamp(34px,9vw,80px) Cinzel,serif;letter-spacing:.2em;margin:10px 0;background:linear-gradient(180deg,var(--gold2),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
 .win p{color:var(--mute);letter-spacing:.2em;text-transform:uppercase;font-size:12px}
-.ngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
-.nc{position:relative;display:grid;grid-template-columns:112px 1fr;gap:12px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
+.ngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:14px}
+.nc{min-width:0;position:relative;display:grid;grid-template-columns:112px 1fr;gap:12px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}
 .nc.w{border-color:var(--gold2)}
 .num{position:absolute;top:0;left:0;z-index:2;background:var(--gold);color:#111;font:700 13px Montserrat,sans-serif;padding:3px 9px;border-radius:12px 0 10px 0}
 .pic{display:block;aspect-ratio:3/4;border-radius:8px;overflow:hidden;position:relative;background:linear-gradient(160deg,#2c2411,#0c0c0e);text-decoration:none;display:flex;align-items:flex-end}
@@ -99,6 +99,19 @@ input,select{width:100%;background:var(--panel2);color:var(--text);border:1px so
 @keyframes glow{0%,100%{box-shadow:0 0 14px rgba(255,200,60,.5),0 0 30px rgba(255,120,0,.25)}50%{box-shadow:0 0 28px rgba(255,220,100,.9),0 0 55px rgba(255,120,0,.5)}}
 @keyframes shine{from{background-position:150% 0}to{background-position:-100% 0}}
 @media (prefers-reduced-motion:reduce){.sr.win,.sr.win .av,.sr.win::after,.flames span{animation:none}}
+@media (max-width:520px){
+main{padding:0 10px 60px}
+.cat.n{padding:14px 10px}
+.nc{grid-template-columns:96px minmax(0,1fr);gap:10px;padding:10px}
+.nb{grid-template-columns:1fr;gap:6px}
+.nb button{padding:11px 6px;font-size:12px}
+.nt{font-size:15px}
+.scols{grid-template-columns:minmax(0,1fr)}
+.st{padding:12px 8px}
+.sr{padding:10px;gap:10px}
+.av{width:52px;height:52px}
+.sr .cnt{font-size:28px}
+}
 @media (prefers-reduced-motion:reduce){.win,.win .tr{animation:none}}
 </style></head><body>
 <header><div class="logo">THE FRIENDS AWARDS</div><div class="sub">Pick your winners. Predict the real ones.</div></header>
