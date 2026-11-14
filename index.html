@@ -67,6 +67,21 @@ input,select{width:100%;background:var(--panel2);color:var(--text);border:1px so
 .cd{text-align:center;margin:6px 0 2px;font:700 13px Montserrat,sans-serif;letter-spacing:.15em;color:var(--mute)}
 .cd b{color:var(--gold2);font-size:18px;letter-spacing:.08em}
 .cat.n h2{text-align:center}
+.st{background:linear-gradient(180deg,#14191f,#0d1116);border:1px solid #232a33;border-radius:14px;padding:18px;margin:22px 0}
+.sttl{display:flex;align-items:center;justify-content:center;gap:14px;margin:26px 0 -6px}
+.sttl h2{margin:0;text-align:center}
+.lf{font-size:30px;filter:sepia(1) saturate(3) hue-rotate(5deg) brightness(1.1)}.lf.r{transform:scaleX(-1)}
+.scols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px}
+.shd{font:600 12px Montserrat,sans-serif;letter-spacing:.08em;color:#aab3bd;text-transform:uppercase;margin-bottom:10px}
+.sr{display:flex;align-items:center;gap:14px;padding:12px 16px;margin:8px 0;border-radius:10px;background:linear-gradient(135deg,#242a32,#1a1f26);border:1px solid #2b323b;--ac:#aab3bd}
+.sr.top{--ac:#5ee09a;background:linear-gradient(135deg,#1f3a2e,#1a1f26 60%);border-color:#2f6a4b;box-shadow:inset 3px 0 0 var(--ac)}
+.sr.top.b{--ac:#5aa9ff;background:linear-gradient(135deg,#1c3350,#1a1f26 60%);border-color:#2f5a8a}
+.sr.win{border-color:var(--gold2)}
+.av{width:62px;height:62px;border-radius:50%;flex:none;overflow:hidden;background:linear-gradient(160deg,#2c2411,#0c0c0e);border:2px solid #3a424c;display:flex;align-items:center;justify-content:center;font:700 18px Cinzel,serif;color:var(--gold2)}
+.av img{width:100%;height:100%;object-fit:cover;display:block}
+.sr .mid{flex:1;min-width:0}.sr .nmx{font-weight:600;font-size:17px;color:#f2f4f6;overflow-wrap:anywhere}
+.sr .cnt{font:700 34px Montserrat,sans-serif;color:#7d8793}.sr.top .cnt{color:var(--ac)}
+.sr .chips{margin-top:6px}.sr .chip{background:#2d343d;border:0;color:#cfd5db;padding:3px 10px}
 @media (prefers-reduced-motion:reduce){.win,.win .tr{animation:none}}
 </style></head><body>
 <header><div class="logo">THE FRIENDS AWARDS</div><div class="sub">Pick your winners. Predict the real ones.</div></header>
@@ -153,22 +168,27 @@ function ballot() {
   });
   return a;
 }
+function av(c, n) { const t = h('div', { class: 'av' }, ''); const i = imgOf(c, n); if (i) { const im = h('img', { src: i, alt: '', loading: 'lazy' }); im.onerror = () => { im.remove(); t.textContent = n.slice(0, 2).toUpperCase() }; t.append(im) } else t.textContent = n.slice(0, 2).toUpperCase(); return t }
 function stats() {
   if (!done(mine)) return h('div', { class: 'msg' }, 'Finish your ballot to unlock everyone’s picks.');
   const a = h('div'), vs = Object.entries(allVotes()).filter(([, p]) => done(p));
   a.append(h('div', { class: 'prog' }, vs.length + ' completed ballots'));
   cats.forEach(c => {
-    const card = h('div', { class: 'cat' }, h('h2', null, c.name));
+    a.append(h('div', { class: 'sttl' }, h('span', { class: 'lf' }, '🌿'), h('h2', null, c.name), h('span', { class: 'lf r' }, '🌿')));
+    const cols = h('div', { class: 'scols' });
     [['want', 'Who people want to win'], ['will', 'Who people think will win']].forEach(([k, l]) => {
-      card.append(h('div', { class: 'sh' }, l));
+      const col = h('div', null, h('div', { class: 'shd' }, l));
       const rows = c.noms.map(x => [x.name, vs.filter(([, p]) => p[c.id][k] === x.name).map(([n]) => n)]).sort((x, y) => y[1].length - x[1].length);
-      const mx = Math.max(1, rows[0][1].length);
-      rows.forEach(([x, ids]) => card.append(h('div', { class: 'row' }, thumb(c, x), h('div', { class: 'b' },
-        h('div', { class: 't' }, h('span', null, (published && k === 'will' && results[c.id] === x ? '🏆 ' : '') + x), h('span', null, ids.length)),
-        h('div', { class: 'bar' }, h('i', { style: 'width:' + ids.length / mx * 100 + '%' })),
-        h('div', { class: 'chips' }, ids.map(n => h('span', { class: 'chip' }, n)))))));
+      const mx = rows[0][1].length;
+      rows.forEach(([x, ids]) => {
+        const w = published && k === 'will' && results[c.id] === x;
+        col.append(h('div', { class: 'sr' + (mx > 0 && ids.length === mx ? ' top' : '') + (k === 'will' ? ' b' : '') + (w ? ' win' : '') }, av(c, x),
+          h('div', { class: 'mid' }, h('div', { class: 'nmx' }, (w ? '🏆 ' : '') + x), ids.length ? h('div', { class: 'chips' }, ids.map(n => h('span', { class: 'chip' }, n))) : null),
+          h('div', { class: 'cnt' }, ids.length)));
+      });
+      cols.append(col);
     });
-    a.append(card);
+    a.append(h('div', { class: 'st' }, cols));
   });
   return a;
 }
