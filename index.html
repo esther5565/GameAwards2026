@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Friends Game Awards</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏆</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050505;--panel:#111114;--panel2:#1a1a1f;--text:#f4f1ea;--mute:#9a968b;--gold:#c9a45c;--gold2:#f3dca0;--line:#2a2a2f}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% -10%,#2b2312 0,var(--bg) 55%) fixed,var(--bg);color:var(--text);font-family:Montserrat,system-ui,sans-serif;min-height:100vh}
+header{text-align:center;padding:40px 16px 8px}
+.logo{font-family:Cinzel,serif;font-weight:900;letter-spacing:.3em;font-size:clamp(22px,5vw,40px);background:linear-gradient(180deg,var(--gold2),var(--gold) 60%,#7b6230);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mute);letter-spacing:.3em;font-size:11px;text-transform:uppercase;margin-top:6px}
+nav{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:18px 12px;position:sticky;top:0;background:linear-gradient(var(--bg) 70%,transparent);z-index:5}
+nav button{background:none;border:1px solid var(--line);color:var(--mute);padding:9px 18px;font:600 12px Montserrat,sans-serif;letter-spacing:.15em;text-transform:uppercase;cursor:pointer}
+nav button.on{color:#111;background:linear-gradient(180deg,var(--gold2),var(--gold));border-color:var(--gold)}
+main{max-width:1040px;margin:0 auto;padding:0 16px 80px}
+.cat{background:var(--panel);border:1px solid var(--line);border-top:2px solid var(--gold);margin:20px 0;padding:22px}
+h2{font-family:Cinzel,serif;font-weight:700;letter-spacing:.12em;margin:0 0 14px;font-size:clamp(18px,3.5vw,26px);color:var(--gold2);text-transform:uppercase}
+.posters{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+.card{display:flex;flex-direction:column;background:var(--panel2);border:1px solid var(--line)}
+.card.w{border-color:var(--gold2)}
+.img{aspect-ratio:3/4;background:linear-gradient(160deg,#2c2411,#0c0c0e);position:relative;overflow:hidden;display:flex;align-items:flex-end}
+.img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.img span{position:relative;padding:10px;font:700 15px Cinzel,serif;color:var(--gold2)}
+.name{padding:10px 10px 6px;font-weight:600;font-size:13px;line-height:1.3;min-height:44px}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}
+.btns button{background:var(--panel);border:0;color:var(--mute);padding:10px 4px;font:600 11px Montserrat,sans-serif;letter-spacing:.08em;cursor:pointer}
+.btns button:hover{color:var(--text)}
+.btns button.sel{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#111}
+.prog{color:var(--mute);font-size:12px;letter-spacing:.15em;text-align:center;margin:10px 0}
+.msg{text-align:center;color:var(--mute);padding:60px 10px;line-height:1.7}
+.hint{color:var(--mute);font-size:12px;margin:-6px 0 14px}
+.row{display:flex;gap:12px;margin:14px 0;align-items:flex-start}
+.th{width:46px;height:62px;flex:none;background:linear-gradient(160deg,#2c2411,#0c0c0e);overflow:hidden}.th img{width:100%;height:100%;object-fit:cover;display:block}
+.row .b{flex:1;min-width:0}.row .t{display:flex;justify-content:space-between;font-weight:600;font-size:14px;gap:8px}
+.bar{height:6px;background:var(--line);margin:8px 0 6px}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.chips{display:flex;flex-wrap:wrap;gap:5px}.chip{font-size:11px;padding:3px 8px;border:1px solid var(--line);color:var(--mute);border-radius:99px}
+.sh{font:600 11px Montserrat,sans-serif;letter-spacing:.2em;color:var(--gold);margin:18px 0 4px;text-transform:uppercase}
+input,select{width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:12px;font:15px Montserrat,sans-serif;margin-bottom:8px}
+.btn{background:linear-gradient(180deg,var(--gold2),var(--gold));color:#111;border:0;padding:12px 24px;font:700 12px Montserrat,sans-serif;letter-spacing:.15em;text-transform:uppercase;cursor:pointer}
+.btn.alt{background:var(--line);color:var(--text)}
+.lb{display:flex;align-items:center;gap:14px;padding:14px;background:var(--panel);border:1px solid var(--line);margin:8px 0}
+.lb .n{font:700 26px Cinzel,serif;color:var(--gold);width:36px}.lb .s{margin-left:auto;font:700 22px Cinzel,serif;color:var(--gold2)}
+.login{max-width:380px;margin:60px auto;text-align:center}
+.win{position:fixed;inset:0;z-index:50;background:radial-gradient(circle at 50% 40%,#4a3a14,#000 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;cursor:pointer;animation:f 1s}
+@keyframes f{from{opacity:0}}@keyframes g{0%,100%{filter:drop-shadow(0 0 10px #c9a45c)}50%{filter:drop-shadow(0 0 40px #f3dca0)}}
+.win .tr{font-size:90px;animation:g 2.5s infinite}
+.win h1{font:900 clamp(34px,9vw,80px) Cinzel,serif;letter-spacing:.2em;margin:10px 0;background:linear-gradient(180deg,var(--gold2),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.win p{color:var(--mute);letter-spacing:.2em;text-transform:uppercase;font-size:12px}
+@media (prefers-reduced-motion:reduce){.win,.win .tr{animation:none}}
+</style></head><body>
+<header><div class="logo">THE FRIENDS AWARDS</div><div class="sub">Pick your winners. Predict the real ones.</div></header>
+<nav id="nav"></nav><main id="app"><div class="msg">Loading…</div></main>
+<script>
+// ====== PASTE YOUR APPS SCRIPT WEB APP URL HERE ======
+const API = "PASTE_YOUR_WEB_APP_URL_HERE";
+// =====================================================
+const $ = s => document.querySelector(s);
+function h(t, a, ...k) { const e = document.createElement(t); for (const x in a || {}) { if (x === 'class') e.className = a[x]; else if (x.startsWith('on')) e[x] = a[x]; else e.setAttribute(x, a[x]) } for (const c of k.flat()) if (c != null) e.append(c); return e }
+const store = { get(k) { try { return localStorage.getItem(k) } catch (e) { return null } }, set(k, v) { try { localStorage.setItem(k, v) } catch (e) {} } };
+let cats = [], votes = {}, results = {}, published = false, name = store.get('awards-name') || '', mine = {}, tab = 'ballot', adminKey = '', loaded = false, err = '', dismissed = false;
+const imgOf = (c, n) => (c.noms.find(x => x.name === n) || {}).image || '';
+const done = p => cats.length && cats.every(c => p && p[c.id] && p[c.id].want && p[c.id].will);
+const score = p => cats.reduce((s, c) => s + (p[c.id] && results[c.id] && p[c.id].will === results[c.id] ? 1 : 0), 0);
+const allVotes = () => { const v = Object.assign({}, votes); if (name) v[name] = mine; return v };
+async function load() {
+  try {
+    const r = await (await fetch(API + '?action=data')).json();
+    cats = r.cats; votes = r.votes; results = r.results; published = r.published; err = '';
+    if (name && votes[name] && !Object.keys(mine).length) mine = votes[name];
+  } catch (e) { err = 'Could not reach the Google Sheet. Check the API URL in index.html.' }
+  loaded = true; render();
+}
+async function post(body) {
+  const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(body) });
+  const j = await r.json(); if (j.error) throw new Error(j.error); return j;
+}
+let saveT;
+function pick(cid, k, n) {
+  mine[cid] = Object.assign({}, mine[cid], { [k]: n }); render();
+  clearTimeout(saveT); saveT = setTimeout(() => post({ action: 'vote', name, picks: mine }).catch(e => alert('Save failed: ' + e.message)), 600);
+}
+function thumb(c, n) { const t = h('div', { class: 'th' }); const i = imgOf(c, n); if (i) { const im = h('img', { src: i, alt: '', loading: 'lazy' }); im.onerror = () => im.remove(); t.append(im) } return t }
+function nav() {
+  const n = $('#nav'); n.textContent = '';
+  if (!name) return;
+  [['ballot', 'Ballot'], ['stats', 'Stats'], ['board', 'Leaderboard']].concat(adminKey ? [['admin', 'Admin']] : [])
+    .forEach(([k, l]) => n.append(h('button', { class: tab === k ? 'on' : '', onclick: () => { tab = k; render() } }, l)));
+}
+function loginView() {
+  const i = h('input', { placeholder: 'Your name', maxlength: 30 });
+  const go = () => { const v = i.value.trim(); if (!v) return; name = v; store.set('awards-name', v); mine = votes[v] || {}; render() };
+  i.onkeydown = e => { if (e.key === 'Enter') go() };
+  return h('div', { class: 'login' }, h('h2', null, 'Who are you?'), h('p', { class: 'hint' }, 'Use the same name next time to edit your picks.'), i, h('button', { class: 'btn', onclick: go }, 'Enter'));
+}
+function ballot() {
+  const a = h('div'), n = cats.filter(c => mine[c.id] && mine[c.id].want && mine[c.id].will).length;
+  a.append(h('div', { class: 'prog' }, done(mine) ? 'BALLOT COMPLETE. See the Stats tab.' : n + ' of ' + cats.length + ' categories done'));
+  a.append(h('div', { class: 'prog' }, 'Playing as ' + name + ' ', h('a', { href: '#', style: 'color:var(--gold)', onclick: e => { e.preventDefault(); name = ''; store.set('awards-name', ''); mine = {}; render() } }, '(not you?)')));
+  cats.forEach(c => {
+    const p = mine[c.id] || {}, card = h('div', { class: 'cat' }, h('h2', null, c.name), h('div', { class: 'hint' }, 'Want = who you’d like to win. Will win = your prediction (1 point if right).'));
+    card.append(h('div', { class: 'posters' }, c.noms.map(x => {
+      const im = h('div', { class: 'img' }, h('span', null, x.image ? '' : x.name));
+      if (x.image) { const g = h('img', { src: x.image, alt: x.name, loading: 'lazy' }); g.onerror = () => { g.remove(); im.firstChild.textContent = x.name }; im.prepend(g) }
+      return h('div', { class: 'card' + (p.want === x.name || p.will === x.name ? ' w' : '') }, im, h('div', { class: 'name' }, x.name),
+        h('div', { class: 'btns' }, h('button', { class: p.want === x.name ? 'sel' : '', onclick: () => pick(c.id, 'want', x.name) }, '★ WANT'), h('button', { class: p.will === x.name ? 'sel' : '', onclick: () => pick(c.id, 'will', x.name) }, '🔮 WILL WIN')))
+    })));
+    a.append(card)
+  });
+  return a;
+}
+function stats() {
+  if (!done(mine)) return h('div', { class: 'msg' }, 'Finish your ballot to unlock everyone’s picks.');
+  const a = h('div'), vs = Object.entries(allVotes()).filter(([, p]) => done(p));
+  a.append(h('div', { class: 'prog' }, vs.length + ' completed ballots'));
+  cats.forEach(c => {
+    const card = h('div', { class: 'cat' }, h('h2', null, c.name));
+    [['want', 'Who people want to win'], ['will', 'Who people think will win']].forEach(([k, l]) => {
+      card.append(h('div', { class: 'sh' }, l));
+      const rows = c.noms.map(x => [x.name, vs.filter(([, p]) => p[c.id][k] === x.name).map(([n]) => n)]).sort((x, y) => y[1].length - x[1].length);
+      const mx = Math.max(1, rows[0][1].length);
+      rows.forEach(([x, ids]) => card.append(h('div', { class: 'row' }, thumb(c, x), h('div', { class: 'b' },
+        h('div', { class: 't' }, h('span', null, (published && k === 'will' && results[c.id] === x ? '🏆 ' : '') + x), h('span', null, ids.length)),
+        h('div', { class: 'bar' }, h('i', { style: 'width:' + ids.length / mx * 100 + '%' })),
+        h('div', { class: 'chips' }, ids.map(n => h('span', { class: 'chip' }, n)))))));
+    });
+    a.append(card);
+  });
+  return a;
+}
+function board() {
+  if (!published) return h('div', { class: 'msg' }, 'Results haven’t been announced yet. Check back on award night.');
+  const a = h('div'), r = Object.entries(allVotes()).filter(([, p]) => done(p)).map(([n, p]) => [n, score(p)]).sort((x, y) => y[1] - x[1]);
+  r.forEach(([n, s], i) => a.append(h('div', { class: 'lb' }, h('div', { class: 'n' }, i + 1), h('div', null, n), h('div', { class: 's' }, s + ' / ' + cats.length))));
+  a.append(h('div', { class: 'sh', style: 'margin-top:30px' }, 'The winners'));
+  cats.forEach(c => a.append(h('div', { class: 'row' }, thumb(c, results[c.id]), h('div', { class: 'b' }, h('div', { class: 't' }, h('span', null, c.name), h('span', { style: 'color:var(--gold2)' }, results[c.id] || '—'))))));
+  return a;
+}
+function admin() {
+  const a = h('div', { class: 'cat' }, h('h2', null, 'Publish results'), h('div', { class: 'hint' }, 'Edit nominees and images directly in the Google Sheet. Choose the real winners here.'));
+  const w = Object.assign({}, results);
+  cats.forEach(c => { const s = h('select', { onchange: e => { w[c.id] = e.target.value } }, h('option', { value: '' }, c.name + ': winner…'), c.noms.map(x => h('option', { value: x.name }, x.name))); s.value = w[c.id] || ''; a.append(s) });
+  const send = pub => post({ action: 'results', key: adminKey, winners: w, published: pub }).then(() => { dismissed = false; load() }).catch(e => alert(e.message));
+  a.append(h('button', { class: 'btn', onclick: () => send(true) }, 'Publish results'), ' ', h('button', { class: 'btn alt', onclick: () => send(false) }, 'Unpublish'));
+  return a;
+}
+function winScreen() {
+  if (!published || dismissed || !cats.length) return;
+  const key = 'seen' + JSON.stringify(results); if (store.get(key)) return;
+  const r = Object.entries(allVotes()).filter(([, p]) => done(p)).map(([n, p]) => [n, score(p)]); if (!r.length) return;
+  const top = Math.max(...r.map(x => x[1])), w = r.filter(x => x[1] === top);
+  document.body.append(h('div', { class: 'win', onclick: () => { dismissed = true; store.set(key, '1'); render() } }, h('div', { class: 'tr' }, '🏆'), h('p', null, 'Prediction champion'),
+    h('h1', null, w.map(x => x[0].toUpperCase()).join(' & ')), h('p', null, top + ' of ' + cats.length + ' correct. Tap to continue.')));
+}
+function render() {
+  document.querySelectorAll('.win').forEach(e => e.remove()); nav(); const m = $('#app'); m.textContent = '';
+  if (err) return m.append(h('div', { class: 'msg' }, err));
+  if (!loaded) return m.append(h('div', { class: 'msg' }, 'Loading…'));
+  if (!cats.length) return m.append(h('div', { class: 'msg' }, 'No nominees yet. Add them in the Nominees tab of the Google Sheet.'));
+  if (!name) return m.append(loginView());
+  m.append(tab === 'ballot' ? ballot() : tab === 'stats' ? stats() : tab === 'board' ? board() : admin());
+  winScreen();
+}
+if (location.hash === '#admin') adminKey = prompt('Admin key') || '';
+render(); load();
+setInterval(() => { if (document.visibilityState === 'visible' && (tab === 'stats' || tab === 'board')) load() }, 30000);
+</script></body></html>
