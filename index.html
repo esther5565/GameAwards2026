@@ -89,10 +89,16 @@ function nav() {
     .forEach(([k, l]) => n.append(h('button', { class: tab === k ? 'on' : '', onclick: () => { tab = k; render() } }, l)));
 }
 function loginView() {
-  const i = h('input', { placeholder: 'Your name', maxlength: 30 });
-  const go = () => { const v = i.value.trim(); if (!v) return; name = v; store.set('awards-name', v); mine = votes[v] || {}; render() };
-  i.onkeydown = e => { if (e.key === 'Enter') go() };
-  return h('div', { class: 'login' }, h('h2', null, 'Who are you?'), h('p', { class: 'hint' }, 'Use the same name next time to edit your picks.'), i, h('button', { class: 'btn', onclick: go }, 'Enter'));
+  const f = h('input', { placeholder: 'First name', maxlength: 30, autocomplete: 'given-name' });
+  const l = h('input', { placeholder: 'Surname', maxlength: 30, autocomplete: 'family-name' });
+  const go = () => {
+    const fn = f.value.trim().replace(/\s+/g, ' '), ln = l.value.trim().replace(/\s+/g, ' ');
+    if (!fn || !ln) return alert('Please enter both your first name and surname.');
+    const full = fn + ' ' + ln, ex = Object.keys(votes).find(k => k.toLowerCase() === full.toLowerCase());
+    name = ex || full; store.set('awards-name', name); mine = votes[name] || {}; render();
+  };
+  [f, l].forEach(i => i.onkeydown = e => { if (e.key === 'Enter') go() });
+  return h('div', { class: 'login' }, h('h2', null, 'Who are you?'), h('p', { class: 'hint' }, 'Enter your full name so we know who voted for what. Use the same name next time to edit your picks.'), f, l, h('button', { class: 'btn', onclick: go }, 'Enter'));
 }
 function ballot() {
   const a = h('div'), n = cats.filter(c => mine[c.id] && mine[c.id].want && mine[c.id].will).length;
