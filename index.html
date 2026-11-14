@@ -114,10 +114,16 @@ const imgOf = (c, n) => (c.noms.find(x => x.name === n) || {}).image || '';
 const done = p => cats.length && cats.every(c => p && p[c.id] && p[c.id].want && p[c.id].will);
 const score = p => cats.reduce((s, c) => s + (p[c.id] && results[c.id] && p[c.id].will === results[c.id] ? 1 : 0), 0);
 const allVotes = () => { const v = Object.assign({}, votes); if (name) v[name] = mine; return v };
+const nz = x => String(x == null ? '' : x).trim().toLowerCase();
+function fixResults(raw) {
+  const out = {}; raw = raw || {};
+  cats.forEach(c => { const k = Object.keys(raw).find(k => nz(k) === nz(c.id)); if (k === undefined) return; const n = c.noms.find(n => nz(n.name) === nz(raw[k])); if (n) out[c.id] = n.name });
+  return out;
+}
 async function load() {
   try {
     const r = await (await fetch(API + '?action=data')).json();
-    cats = r.cats; votes = r.votes; results = r.results; published = r.published; locked = r.locked; deadline = r.deadline; err = '';
+    cats = r.cats; votes = r.votes; results = fixResults(r.results); published = r.published; locked = r.locked; deadline = r.deadline; err = '';
     if (name && votes[name] && !Object.keys(mine).length) mine = votes[name];
   } catch (e) { err = 'Could not reach the Google Sheet. Check the API URL in index.html.' }
   loaded = true; render();
@@ -218,9 +224,10 @@ function board() {
 }
 function admin() {
   const a = h('div', { class: 'cat' }, h('h2', null, 'Publish results'), h('div', { class: 'hint' }, 'Edit nominees and images directly in the Google Sheet. Choose the real winners here.'));
+  a.append(h('div', { class: 'prog' }, 'Status: ' + (published ? 'PUBLISHED' : 'not published') + ' · ' + Object.keys(results).length + ' of ' + cats.length + ' winners saved'));
   const w = Object.assign({}, results);
   cats.forEach(c => { const s = h('select', { onchange: e => { w[c.id] = e.target.value } }, h('option', { value: '' }, c.name + ': winner…'), c.noms.map(x => h('option', { value: x.name }, x.name))); s.value = w[c.id] || ''; a.append(s) });
-  const send = pub => post({ action: 'results', key: adminKey, winners: w, published: pub }).then(() => { dismissed = false; load() }).catch(e => alert(e.message));
+  const send = pub => post({ action: 'results', key: adminKey, winners: w, published: pub }).then(() => { dismissed = false; if (pub) tab = 'board'; alert(pub ? 'Results published.' : 'Results unpublished.'); load() }).catch(e => alert('Failed: ' + e.message));
   a.append(h('button', { class: 'btn', onclick: () => send(true) }, 'Publish results'), ' ', h('button', { class: 'btn alt', onclick: () => send(false) }, 'Unpublish'));
   return a;
 }
@@ -241,7 +248,10 @@ function render() {
   m.append(tab === 'ballot' ? ballot() : tab === 'stats' ? stats() : tab === 'board' ? board() : admin());
   winScreen();
 }
+function askAdmin() { const k = prompt('Admin key'); if (k) { adminKey = k; tab = 'admin'; render() } }
+window.addEventListener('hashchange', () => { if (location.hash === '#admin') askAdmin() });
 if (location.hash === '#admin') adminKey = prompt('Admin key') || '';
+document.body.append(h('div', { style: 'text-align:center;padding:0 0 30px' }, h('a', { href: '#', style: 'color:#3a3a3f;font-size:11px;text-decoration:none', onclick: e => { e.preventDefault(); askAdmin() } }, 'admin')));
 render(); load();
 setInterval(tick, 30000);
 setInterval(() => { if (document.visibilityState === 'visible' && (tab === 'stats' || tab === 'board')) load() }, 30000);
