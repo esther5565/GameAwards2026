@@ -141,7 +141,7 @@ const API = "https://script.google.com/macros/s/AKfycbwBEHbT4BhHUyABn096YSpqyElC
 const $ = s => document.querySelector(s);
 function h(t, a, ...k) { const e = document.createElement(t); for (const x in a || {}) { if (a[x] == null) continue; if (x === 'class') e.className = a[x]; else if (x.startsWith('on')) e[x] = a[x]; else e.setAttribute(x, a[x]) } for (const c of k.flat()) if (c != null) e.append(c); return e }
 const store = { get(k) { try { return localStorage.getItem(k) } catch (e) { return null } }, set(k, v) { try { localStorage.setItem(k, v) } catch (e) {} } };
-let cats = [], votes = {}, results = {}, published = false, locked = false, deadline = '', name = store.get('awards-name') || '', mine = {}, tab = 'ballot', adminKey = '', loaded = false, err = '', dismissed = false;
+let cats = [], votes = {}, results = {}, published = false, locked = false, deadline = '', name = store.get('awards-name') || '', pw = store.get('awards-pw') || '', group = '', mine = {}, tab = 'ballot', adminKey = '', loaded = false, err = '', dismissed = false;
 const imgOf = (c, n) => (c.noms.find(x => x.name === n) || {}).image || '';
 const done = p => cats.length && cats.every(c => p && p[c.id] && p[c.id].want && p[c.id].will);
 const score = p => cats.reduce((s, c) => s + (p[c.id] && results[c.id] && p[c.id].will === results[c.id] ? 1 : 0), 0);
@@ -152,12 +152,25 @@ function fixResults(raw) {
   cats.forEach(c => { const k = Object.keys(raw).find(k => nz(k) === nz(c.id)); if (k === undefined) return; const n = c.noms.find(n => nz(n.name) === nz(raw[k])); if (n) out[c.id] = n.name });
   return out;
 }
+function logout(msg) {
+  name = ''; pw = ''; group = ''; mine = {}; votes = {}; store.set('awards-name', ''); store.set('awards-pw', ''); loaded = true; render();
+  if (msg) setTimeout(() => alert(msg), 50);
+}
 async function load() {
+  if (!pw) { loaded = true; return render() }
   try {
-    const r = await (await fetch(API + '?action=data')).json();
-    cats = r.cats; votes = r.votes; results = fixResults(r.results); published = r.published; locked = r.locked; deadline = r.deadline; err = '';
-    if (name && votes[name] && !Object.keys(mine).length) mine = votes[name];
-  } catch (e) { err = 'Could not reach the Google Sheet. Check the API URL in index.html.' }
+    const r = await post({ action: 'data', pw });
+    cats = r.cats; votes = r.votes; results = fixResults(r.results); published = r.published; locked = r.locked; deadline = r.deadline; group = r.group; err = '';
+    if (name) {
+      const ex = Object.keys(votes).find(k => k.toLowerCase() === name.toLowerCase()); if (ex) name = ex;
+      if (locked && !ex) return logout('Voting closed on 9 December 2026, and no ballot was found under that name.');
+      store.set('awards-name', name);
+      if (!Object.keys(mine).length) mine = votes[name] || {};
+    }
+  } catch (e) {
+    if (/password/i.test(e.message)) return logout('Wrong password. Please try again.');
+    err = 'Could not reach the Google Sheet. Check the API URL in index.html.';
+  }
   loaded = true; render();
 }
 async function post(body) {
@@ -168,27 +181,28 @@ let saveT;
 function pick(cid, k, n) {
   if (locked) return alert('Voting is closed.');
   mine[cid] = Object.assign({}, mine[cid], { [k]: n }); render();
-  clearTimeout(saveT); saveT = setTimeout(() => post({ action: 'vote', name, picks: mine }).catch(e => alert('Save failed: ' + e.message)), 600);
+  clearTimeout(saveT); saveT = setTimeout(() => post({ action: 'vote', name, pw, picks: mine }).catch(e => alert('Save failed: ' + e.message)), 600);
 }
 function thumb(c, n) { const t = h('div', { class: 'th' }); const i = imgOf(c, n); if (i) { const im = h('img', { src: i, alt: '', loading: 'lazy' }); im.onerror = () => im.remove(); t.append(im) } return t }
 function nav() {
   const n = $('#nav'); n.textContent = '';
-  if (!name) return;
+  if (!name || !pw) return;
   [['ballot', 'Ballot'], ['stats', 'Stats'], ['board', 'Leaderboard']].concat(adminKey ? [['admin', 'Admin']] : [])
     .forEach(([k, l]) => n.append(h('button', { class: tab === k ? 'on' : '', onclick: () => { tab = k; render() } }, l)));
 }
 function loginView() {
   const f = h('input', { placeholder: 'First name', maxlength: 30, autocomplete: 'given-name' });
   const l = h('input', { placeholder: 'Surname', maxlength: 30, autocomplete: 'family-name' });
+  const p = h('input', { placeholder: 'Group password', type: 'password', autocomplete: 'current-password' });
   const go = () => {
     const fn = f.value.trim().replace(/\s+/g, ' '), ln = l.value.trim().replace(/\s+/g, ' ');
     if (!fn || !ln) return alert('Please enter both your first name and surname.');
-    const full = fn + ' ' + ln, ex = Object.keys(votes).find(k => k.toLowerCase() === full.toLowerCase());
-    if (locked && !ex) return alert('Voting closed on 9 December 2026, and no ballot was found under that name.');
-    name = ex || full; store.set('awards-name', name); mine = votes[name] || {}; render();
+    if (!p.value.trim()) return alert('Please enter your group password.');
+    name = fn + ' ' + ln; pw = p.value.trim(); mine = {}; store.set('awards-name', name); store.set('awards-pw', pw);
+    loaded = false; render(); load();
   };
-  [f, l].forEach(i => i.onkeydown = e => { if (e.key === 'Enter') go() });
-  return h('div', { class: 'login' }, h('h2', null, 'Who are you?'), h('p', { class: 'hint' }, 'Enter your full name so we know who voted for what. Use the same name next time to edit your picks.'), f, l, h('button', { class: 'btn', onclick: go }, 'Enter'));
+  [f, l, p].forEach(i => i.onkeydown = e => { if (e.key === 'Enter') go() });
+  return h('div', { class: 'login' }, h('h2', null, 'Who are you?'), h('p', { class: 'hint' }, 'Enter your full name and the password you were given. Your password decides which group you play in. Use the same details next time to edit your picks.'), f, l, p, h('button', { class: 'btn', onclick: go }, 'Enter'));
 }
 const vurl = x => /^https?:\/\//.test(x.video || '') ? x.video : 'https://www.youtube.com/results?search_query=' + encodeURIComponent(x.name + ' official trailer');
 function cdText() {
@@ -207,7 +221,7 @@ function ballot() {
   const a = h('div'), n = cats.filter(c => mine[c.id] && mine[c.id].want && mine[c.id].will).length;
   a.append(locked ? h('div', { class: 'cd' }, '🔒 VOTING CLOSED. BALLOTS ARE LOCKED.') : deadline ? h('div', { class: 'cd' }, 'TIME LEFT  ', h('b', { id: 'cd' }, cdText() || ''), h('div', { class: 'hint', style: 'margin:4px 0 0;letter-spacing:0;font-weight:400' }, 'Votes lock at the end of 9 December 2026 (UK time)')) : '');
   a.append(h('div', { class: 'prog' }, done(mine) ? 'BALLOT COMPLETE. See the Stats tab.' : n + ' of ' + cats.length + ' categories done'));
-  a.append(h('div', { class: 'prog' }, 'Playing as ' + name + ' ', h('a', { href: '#', style: 'color:var(--gold)', onclick: e => { e.preventDefault(); name = ''; store.set('awards-name', ''); mine = {}; render() } }, '(not you?)')));
+  a.append(h('div', { class: 'prog' }, 'Playing as ' + name + (group ? ' · ' + group : '') + ' ', h('a', { href: '#', style: 'color:var(--gold)', onclick: e => { e.preventDefault(); logout() } }, '(not you?)')));
   cats.forEach(c => {
     const p = mine[c.id] || {}, card = h('div', { class: 'cat n' }, h('h2', null, c.name + ' nominees'), h('div', { class: 'hint', style: 'text-align:center' }, 'Want = who you’d like to win. Will win = your prediction (1 point if right). Tap a picture or title to watch the game on YouTube.'));
     card.append(h('div', { class: 'ngrid' }, c.noms.map((x, i) => {
@@ -281,10 +295,10 @@ function winScreen() {
 }
 function render() {
   document.querySelectorAll('.win').forEach(e => e.remove()); nav(); const m = $('#app'); m.textContent = '';
+  if (!name || !pw) return m.append(loginView());
   if (err) return m.append(h('div', { class: 'msg' }, err));
   if (!loaded) return m.append(h('div', { class: 'msg' }, 'Loading…'));
   if (!cats.length) return m.append(h('div', { class: 'msg' }, 'No nominees yet. Add them in the Nominees tab of the Google Sheet.'));
-  if (!name) return m.append(loginView());
   m.append(tab === 'ballot' ? ballot() : tab === 'stats' ? stats() : tab === 'board' ? board() : admin());
   winScreen();
 }
